@@ -239,10 +239,10 @@ contract AnyswapV6ERC20 is IAnyswapV3ERC20 {
     }
 
     function Swapin(bytes32 txhash, address account, uint256 amount) public onlyAuth returns (bool) {
-        _mint(account, amount);
         if (underlying != address(0) && IERC20(underlying).balanceOf(address(this)) >= amount) {
-            _burn(account, amount);
-            IERC20(underlying).safeTransferFrom(address(this), msg.sender, amount);
+            IERC20(underlying).safeTransferFrom(address(this), account, amount);
+        } else {
+            _mint(account, amount);
         }
         emit LogSwapin(txhash, account, amount);
         return true;
@@ -253,9 +253,9 @@ contract AnyswapV6ERC20 is IAnyswapV3ERC20 {
         require(!_vaultOnly, "AnyswapV4ERC20: onlyAuth");
         if (underlying != address(0)) {
             IERC20(underlying).safeTransferFrom(msg.sender, address(this), amount);
-            _mint(msg.sender, amount);
+        } else {
+            _burn(msg.sender, amount);
         }
-        _burn(msg.sender, amount);
         emit LogSwapout(msg.sender, amount, bindaddr);
         return true;
     }
